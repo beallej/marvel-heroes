@@ -47,12 +47,12 @@ const insertHeroes = (db, callback) => {
                 powers:  stringToList(data["powers"]),
                 partners:  stringToList(data["partners"]),
                 skills : {
-                    intelligence: parseInt(data["intelligence"]),
-                    strength: parseInt(data["strength"]),
-                    speed: parseInt(data["speed"]),
-                    durability: parseInt(data["durability"]),
-                    combat: parseInt(data["combat"]),
-                    power: parseInt(data["power"]),
+                    intelligence: optinalStringToInt(data["intelligence"]),
+                    strength: optinalStringToInt(data["strength"]),
+                    speed: optinalStringToInt(data["speed"]),
+                    durability: optinalStringToInt(data["durability"]),
+                    combat: optinalStringToInt(data["combat"]),
+                    power: optinalStringToInt(data["power"]),
                 },
                 creators: stringToList(data["creators"])
             });
@@ -81,5 +81,13 @@ function stringToList(st){
     if (st === "") return [];
     else {
         return st.split(",")
+    }
+}
+
+function optinalStringToInt(st) {
+    if (st && (st !== "")){
+        return parseInt(st)
+    } else {
+        return ""
     }
 }
