@@ -19,7 +19,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Singleton
 public class MongoDBRepository {
@@ -65,19 +64,17 @@ public class MongoDBRepository {
 
 
     public CompletionStage<List<ItemCount>> topPowers(int top) {
-        return CompletableFuture.completedFuture(new ArrayList<>());
-//        // TODO
-//         List<Document> pipeline = new ArrayList<>();
-//         return ReactiveStreamsUtils.fromMultiPublisher(heroesCollection.aggregate(pipeline))
-//                 .thenApply(documents -> {
-//                     return documents.stream()
-//                             .map(Document::toJson)
-//                             .map(Json::parse)
-//                             .map(jsonNode -> {
-//                                 return new ItemCount(jsonNode.findPath("_id").asText(), jsonNode.findPath("count").asInt());
-//                             })
-//                             .collect(Collectors.toList());
-//                 });
+         return ReactiveStreamsUtils.fromMultiPublisher(heroesCollection.aggregate(Arrays.asList(
+                 Aggregates.unwind("$powers"), Aggregates.sortByCount("$powers"), Aggregates.limit(top))))
+                 .thenApply(documents -> {
+                     return documents.stream()
+                             .map(Document::toJson)
+                             .map(Json::parse)
+                             .map(jsonNode -> {
+                                 return new ItemCount(jsonNode.findPath("_id").asText(), jsonNode.findPath("count").asInt());
+                             })
+                             .collect(Collectors.toList());
+                 });
     }
 
     public CompletionStage<List<ItemCount>> byUniverse() {
