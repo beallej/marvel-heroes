@@ -1,6 +1,7 @@
 package repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import env.ElasticConfiguration;
 import env.MarvelHeroesConfiguration;
 import models.PaginatedResults;
@@ -59,13 +60,31 @@ public class ElasticRepository {
                  });
     }
 
+    /*La suggestion doit tenir compte également des alias et identités secrètes des Héros*/
     public CompletionStage<List<SearchedHero>> suggest(String input) {
-        return CompletableFuture.completedFuture(Arrays.asList(SearchedHeroSamples.IronMan(), SearchedHeroSamples.MsMarvel(), SearchedHeroSamples.SpiderMan()));
-        // TODO
-        // return wsClient.url(elasticConfiguration.uri + "...")
-        //         .post(Json.parse("{ ... }"))
-        //         .thenApply(response -> {
-        //             return ...
-        //         });
+        return wsClient.url(elasticConfiguration.uri + "/heroes/_search")
+                .post(Json.parse(
+                        "{\n" +
+                                "    \"suggest\": {\n" +
+                                "      \"suggest-alias-secret\" : {\n" +
+                                "        \"prefix\" : \""+ input +"\",\n" +
+                                "        \"completion\" : {\n" +
+                                "          \"field\" : \"suggest\"\n" +
+                                "        }\n" +
+                                "      }\n" +
+                                "      }\n" +
+                                "  }"
+                ))
+                .thenApply(response -> {
+                    Iterator<JsonNode> hits = response.asJson()
+                            .get("suggest").withArray("suggest-alias-secret").get(0).withArray("options").iterator();
+                    ArrayList<SearchedHero> heroes = new ArrayList<>();
+                    while (hits.hasNext()){
+                        JsonNode hero = hits.next().get("_source");
+                        SearchedHero searchedHero = SearchedHero.fromJson(hero);
+                        heroes.add(searchedHero);
+                    }
+                    return heroes;
+                });
     }
 }
