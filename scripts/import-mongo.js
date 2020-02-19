@@ -17,16 +17,44 @@ const insertHeroes = (db, callback) => {
         // Pour chaque ligne on créé un document JSON pour l'acteur correspondant
         .on('data', data => {
             heroes.push({
-                name: data["name"],
                 id: data["id"],
-                aliases: stringToList(data["aliases"]),
-                secret_identities: stringToList(data["secretIdentities"]),
+                name: data["name"],
+                imageUrl: data["imageUrl"],
+                backgroundImageUrl: data["backgroundImageUrl"],
+                externalLink: data["externalLink"],
                 description: data["description"],
-                partners:  stringToList(data["partners"]),
-                universe: data["universe"],
-                first_appearance: data["yearAppearance"],
-                powers:  stringToList(data["powers"])
+                identity: {
+                    secretIdentities: stringToList(data["secretIdentities"]),
+                    birthPlace: data["birthPlace"],
+                    occupation: data["occupation"],
+                    aliases: stringToList(data["aliases"]),
+                    alignment: data["alignment"],
+                    firstAppearance: data["firstAppearance"],
+                    yearAppearance: data["yearAppearance"],
+                    universe: data["universe"],
+                },
+                appearance: {
+                    gender: data["gender"],
+                    type: data["type"],
+                    race: data["race"],
+                    height: data["height"],
+                    weight: data["weight"],
+                    eyeColor: data["eyeColor"],
+                    hairColor: data["hairColor"],
+                },
 
+                teams: stringToList(data["teams"]),
+                powers:  stringToList(data["powers"]),
+                partners:  stringToList(data["partners"]),
+                skills : {
+                    intelligence: parseInt(data["intelligence"]),
+                    strength: parseInt(data["strength"]),
+                    speed: parseInt(data["speed"]),
+                    durability: parseInt(data["durability"]),
+                    combat: parseInt(data["combat"]),
+                    power: parseInt(data["power"]),
+                },
+                creators: stringToList(data["creators"])
             });
         })
         // A la fin on créé l'ensemble des heroes dans MongoDB
