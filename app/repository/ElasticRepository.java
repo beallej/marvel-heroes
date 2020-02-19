@@ -1,22 +1,18 @@
 package repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import env.ElasticConfiguration;
 import env.MarvelHeroesConfiguration;
 import models.PaginatedResults;
 import models.SearchedHero;
 import play.libs.Json;
 import play.libs.ws.WSClient;
-import utils.SearchedHeroSamples;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 @Singleton

@@ -2,8 +2,6 @@ package repository;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.reactivestreams.client.MongoCollection;
@@ -12,14 +10,12 @@ import models.Hero;
 import models.ItemCount;
 import models.YearAndUniverseStat;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import play.libs.Json;
 import utils.ReactiveStreamsUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
