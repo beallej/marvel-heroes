@@ -39,26 +39,29 @@ public class MongoDBRepository {
     }
 
     public CompletionStage<List<YearAndUniverseStat>> countByYearAndUniverse() {
-
-             String group1 =  "{ $group:"+
-                   "{ _id:"+
-                      "{ yearAppearance: \"$identity.yearAppearance\", universe: \"$identity.universe\" },"+
-                     "count: { \"$sum\":1 }"+
-                    "}"+
-               "}";
-               String group2 = "{ $group:"+
-                  "{ _id:"+
-                      "\"$_id.yearAppearance\","+
-                      "byUniverse:"+
-                      "{"+
-                          "$push: { universe: \"$_id.universe\", count: \"$count\" }"+
-                      "}"+
-                  "}"+
-              "}";
+        String group1 =  "{ $group:"+
+           "{ _id:"+
+              "{ yearAppearance: \"$identity.yearAppearance\", universe: \"$identity.universe\" },"+
+             "count: { \"$sum\":1 }"+
+            "}"+
+        "}";
+        String group2 = "{ $group:"+
+          "{ _id:"+
+              "\"$_id.yearAppearance\","+
+              "byUniverse:"+
+              "{"+
+                  "$push: { universe: \"$_id.universe\", count: \"$count\" }"+
+              "}"+
+          "}"+
+        "}";
+        String sort = "{ $sort: { \"_id\" : 1 } }";
+        String noEmptyValues = "{ $match : { \"identity.yearAppearance\" : { $ne : \"\" } } }";
 
         List<Document> pipeline = new ArrayList<Document>();
+        pipeline.add(Document.parse(noEmptyValues));
         pipeline.add(Document.parse(group1));
         pipeline.add(Document.parse(group2));
+        pipeline.add(Document.parse(sort));
         return ReactiveStreamsUtils.fromMultiPublisher(heroesCollection.aggregate(pipeline))
                 .thenApply(documents -> {
                     return documents.stream()
