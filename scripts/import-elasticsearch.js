@@ -13,7 +13,16 @@ async function run () {
         body: {
             mappings: {
                 properties: {
-                    suggest: {"type": "completion"}
+                    suggest: {"type": "completion"},
+                    name : {
+                        "type": "keyword"
+                    },
+                    secret_identities : {
+                        "type": "keyword"
+                    },
+                    aliases : {
+                        "type": "keyword"
+                    }
                 }
             }
         }
@@ -50,11 +59,11 @@ async function run () {
                         weight: 10
                     },
                     {
-                        input: data.aliases,
+                        input: stringToList(data["aliases"]),
                         weight: 5
                     },
                     {
-                        input: data.secret_identities,
+                        input: stringToList(data["secretIdentities"]),
                         weight: 5
                     }
                 ]
@@ -88,10 +97,10 @@ async function run () {
 function createBulkInsertQuery(heroes) {
     const body = heroes.reduce((acc, hero) => {
         const { name, id, aliases, secret_identities, description,
-            partners, universe, first_appearance, powers, gender, imageUrl } = hero;
+            partners, universe, first_appearance, powers, gender, imageUrl, suggest } = hero;
         acc.push({ index: { _index: heroesIndexName, _type: '_doc', _id: hero.object_id } })
         acc.push({ name, id, aliases, secret_identities, description,
-            partners, universe, first_appearance, powers, gender, imageUrl })
+            partners, universe, first_appearance, powers, gender, imageUrl, suggest })
         return acc
     }, []);
 
