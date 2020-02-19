@@ -1,15 +1,19 @@
 package repository;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import env.ElasticConfiguration;
 import env.MarvelHeroesConfiguration;
 import models.PaginatedResults;
 import models.SearchedHero;
+import play.libs.Json;
 import play.libs.ws.WSClient;
 import utils.SearchedHeroSamples;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -28,13 +32,31 @@ public class ElasticRepository {
 
 
     public CompletionStage<PaginatedResults<SearchedHero>> searchHeroes(String input, int size, int page) {
-        return CompletableFuture.completedFuture(new PaginatedResults<>(3, 1, 1, Arrays.asList(SearchedHeroSamples.IronMan(), SearchedHeroSamples.MsMarvel(), SearchedHeroSamples.SpiderMan())));
-        // TODO
-        // return wsClient.url(elasticConfiguration.uri + "...")
-        //         .post(Json.parse("{ ... }"))
-        //         .thenApply(response -> {
-        //             return ...
-        //         });
+        int from = (page - 1)*size;
+        return wsClient.url(elasticConfiguration.uri + "/_search")
+                 .post(Json.parse("{\n" +
+                         "    \"query\": {\n" +
+                         "      \"multi_match\" : {\n" +
+                         "        \"query\":    \""+ input + "\",\n" +
+                         "        \"fields\": [ \"name^4\", \"aliases^3\", \"secret_identities^3\", \"description^2\", \"partners\" ]\n" +
+                         "      }\n" +
+                         "    },\n" +
+                         "     \"from\": " + from + "," +
+                         "      \"size\": " + size +
+                         "  }"))
+                 .thenApply(response -> {
+                     JsonNode responseObj = response.asJson().get("hits");
+                     Iterator<JsonNode> hits = responseObj.withArray("hits").elements();
+                     ArrayList<SearchedHero> heroes = new ArrayList<>();
+                     while (hits.hasNext()){
+                         JsonNode hero = hits.next().get("_source");
+                         SearchedHero searchedHero = SearchedHero.fromJson(hero);
+                         heroes.add(searchedHero);
+                     }
+                     int numHeroes = responseObj.get("total").get("value").asInt();
+                     int total = (int) Math.ceil((double) numHeroes/size);
+                     return new PaginatedResults<>(numHeroes, page, total, heroes);
+                 });
     }
 
     public CompletionStage<List<SearchedHero>> suggest(String input) {

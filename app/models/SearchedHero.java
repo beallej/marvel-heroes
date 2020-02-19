@@ -13,22 +13,22 @@ public class SearchedHero {
     @JsonProperty("imageUrl")
     public final String imageUrl;
 
-    @JsonProperty("name")
+    @JsonProperty(value = "name")
     public final String name;
 
-    @JsonProperty("universe")
+    @JsonProperty(value = "universe")
     public final String universe;
 
-    @JsonProperty("gender")
+    @JsonProperty(value = "gender")
     public final String gender;
 
     @JsonCreator
-    public SearchedHero(@JsonProperty("id") String id, @JsonProperty("thumbnail") String imageUrl, @JsonProperty("name") String name, @JsonProperty("universe") String universe, @JsonProperty("gender") String gender) {
+    public SearchedHero(@JsonProperty("id") String id, @JsonProperty("imageUrl") String imageUrl, @JsonProperty("name") String name, @JsonProperty("universe") String universe, @JsonProperty("gender") String gender) {
         this.id = id;
         this.imageUrl = imageUrl;
-        this.name = name;
-        this.universe = universe;
-        this.gender = gender;
+        this.name = (name == null) ? "" : name;
+        this.universe = (universe == null) ? "" : universe;
+        this.gender = (gender == null) ? "": gender;
     }
 
     public static SearchedHero fromJson(JsonNode json) {
